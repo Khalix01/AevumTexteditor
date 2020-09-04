@@ -1,27 +1,39 @@
 #include <unistd.h>
 #include <termios.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
 
 #define quit 'q'
 
-void reset(struct termios *orgin){
-	tcsetattr(STDIN_FILENO,TCSAFLUSH,origin);
+struct termios origin;
+
+void reset(){
+	tcsetattr(STDIN_FILENO,TCSAFLUSH,&origin);
 }
 
 void enableRawInput() {
-	struct termios origin,raw;
+	struct termios raw;
 	tcgetattr(STDIN_FILENO,&origin);// storing a copy of default terminal
-	atexit(reset(&origin));// resseting to default at exit of program
+	atexit(reset);// resseting to default at exit of program
 
-	raw = origin
-
-	raw.c_lflag &=  ~(ECHO| ICANON)//disabling flags using bitwise operators
+	raw = origin;
+	raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);// disabling  flags using bit wis e operators
+	raw.c_oflag &= ~(OPOST);
+	raw.c_cflag |= (CS8);
+	raw.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
 
 	tcsetattr(STDIN_FILENO,TCSAFLUSH,&raw);	
 }
 
 int main() {
+	enableRawMode();
 	char c;
-	while(read(STDIN_FILENO,&c,1)==1 && c  != quit);
-	return 0;	
+	while (read(STDIN_FILENO, &c, 1) == 1 && c != 'q') {
+		if (iscntrl(c)) {
+			printf("%d\n", c);
+		} else {
+		printf("%d ('%c')\n", c, c);
+		}
+	}	
 }
