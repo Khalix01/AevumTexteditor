@@ -20,8 +20,9 @@ void enableRawInput() {
 	raw = origin;
 	raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);// disabling  flags using bit wis e operators
 	raw.c_oflag &= ~(OPOST);
-	raw.c_cflag |= (CS8);
 	raw.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
+
+	raw.c_cflag |= (CS8); // setting character size  to 8
 
 	tcsetattr(STDIN_FILENO,TCSAFLUSH,&raw);	
 }
