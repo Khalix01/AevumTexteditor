@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#define quit 'q'
+//Constants:
+#define CTRL_KEY(key) ((key)& 0x1f ) //defineing macro for ctrl + key
 
 struct termios origin;
 
@@ -12,9 +13,14 @@ void reset(){
 	tcsetattr(STDIN_FILENO,TCSAFLUSH,&origin);
 }
 
+void end(cost char *error){
+	fprintf(stderr,error);
+	exit(1);
+}
+
 void enableRawInput() {
 	struct termios raw;
-	tcgetattr(STDIN_FILENO,&origin);// storing a copy of default terminal
+	if(tcgetattr(STDIN_FILENO,&origin)==-1) end("Getting terminal fail");// storing a copy of default terminal
 	atexit(reset);// resseting to default at exit of program
 
 	raw = origin;
@@ -24,7 +30,7 @@ void enableRawInput() {
 
 	raw.c_cflag |= (CS8); // setting character size  to 8
 
-	tcsetattr(STDIN_FILENO,TCSAFLUSH,&raw);	
+	if(tcsetattr(STDIN_FILENO,TCSAFLUSH,&raw)==-1) end("Setting terminal fail");
 }
 
 int main() {
